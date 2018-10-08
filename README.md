@@ -15,7 +15,7 @@ You will need Python 3 to run PyAndSafe.
 git clone https://github.com/kitsook/PyAndSafe.git
 ```
 
-2. Create a Pytyon virtualenv and install necessary package
+2. Create a Python virtualenv and install necessary packages
 
 ```
 cd PyAndSafe
@@ -28,4 +28,4 @@ pip install -r requirements.txt
 ```
 python main.py
 ```
-Follow the prompt to select the export file and input password to decrypt the content.
+Follow the prompt to select an export file and input password to decrypt the content.
