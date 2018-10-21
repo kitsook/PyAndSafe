@@ -24,6 +24,15 @@ python3 -m venv venv
 pip install -r requirements.txt
 ```
 
+For Windows, assuming Python 3.7 installed in default location
+
+```
+cd PyAndSafe
+%LocalAppData%\Programs\Python\Python37\python -m venv venv
+venv\Scripts\activate.bat
+pip install -r requirements.txt
+```
+
 3. Start the application by running
 ```
 python main.py
