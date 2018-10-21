@@ -46,7 +46,7 @@ Here are the steps to use [PyInstaller](http://www.pyinstaller.org/) to generate
 
 ```
 pip install pyinstaller
-pyinstaller main.py
+pyinstaller --onefile main.py
 ```
 
-The bundle will be generated under `dist` subdirectory
+The executable will be generated under `dist` subdirectory
