@@ -38,3 +38,15 @@ pip install -r requirements.txt
 python main.py
 ```
 Follow the prompt to select an export file and input password to decrypt the content.
+
+
+## Building standalone executable
+
+Here are the steps to use [PyInstaller](http://www.pyinstaller.org/) to generate standalone executable, assuming the virtualenv is setup by following steps above.
+
+```
+pip install pyinstaller
+pyinstaller main.py
+```
+
+The bundle will be generated under `dist` subdirectory
