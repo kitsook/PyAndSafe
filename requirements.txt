@@ -1,4 +1,7 @@
-PyQt5==5.11.2
-PyQt5-sip==4.19.12
+cffi==1.14.0
+cryptography==2.9.2
+pycparser==2.20
+PyQt5==5.13.2
+PyQt5-sip==12.7.2
+six==1.14.0
 untangle==1.1.1
-cryptography==2.3.1
