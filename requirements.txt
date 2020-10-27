@@ -1,5 +1,5 @@
 cffi==1.14.0
-cryptography==2.9.2
+cryptography==3.2
 pycparser==2.20
 PyQt5==5.13.2
 PyQt5-sip==12.7.2
