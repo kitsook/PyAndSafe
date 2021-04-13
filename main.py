@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit, \
     QFileDialog, QMessageBox, QVBoxLayout, QTableWidget, QTableWidgetItem, \
     QDesktopWidget, QProgressDialog
 
-from cipher import aesDecrypt
+from cipher import aesDecrypt, aesEncrypt
 
 class AndSafeExportFile:
     def __init__(self, content):
@@ -29,13 +29,14 @@ class Signature:
         data = self.signatureObj.row
         # convert to dict for quick access
         entries = { col['name']: col.cdata for col in data.col }
-        # only support verstion 2
-        if not entries['ver'] or entries['ver'] != '2':
+        # only support verstion 2 or 3
+        if not entries['ver'] or not (entries['ver'] == '2' or entries['ver'] == '3'):
             return False
 
         try:
-            decrypted = aesDecrypt(entries['iv'], entries['salt'], password, entries['payload'])
-            return entries['plain'] == decrypted.decode('ascii')
+            encrypted = aesEncrypt(entries['iv'], entries['salt'], password, entries['plain'])
+            return len(entries['payload']) > 0 and \
+                entries['payload'].upper() == encrypted.hex()[0:len(entries['payload'])].upper()
         except:
             return False
 
