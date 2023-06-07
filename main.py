@@ -4,29 +4,29 @@ from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit, \
     QFileDialog, QMessageBox, QVBoxLayout, QTableWidget, QTableWidgetItem, \
     QDesktopWidget, QProgressDialog
 
-from cipher import aesDecrypt, aesEncrypt
+from cipher import aes_decrypt, aes_encrypt
 
 class AndSafeExportFile:
     def __init__(self, content):
         self.content = content
 
-    def isValid(self):
+    def is_valid(self):
         return self.content and self.content.database and self.content.database['name'] == 'safe'
 
 class Signature:
     def __init__(self, content):
-        self.signatureObj = None
+        self.signature_obj = None
 
         if content.database.table:
             for table in content.database.table:
                 if table['name'] == 'signature':
-                    self.signatureObj = table
+                    self.signature_obj = table
 
     def validate(self, password):
-        if not self.signatureObj:
+        if not self.signature_obj:
             return False
 
-        data = self.signatureObj.row
+        data = self.signature_obj.row
         # convert to dict for quick access
         entries = { col['name']: col.cdata for col in data.col }
         # only support verstion 2 or 3
@@ -34,36 +34,36 @@ class Signature:
             return False
 
         try:
-            encrypted = aesEncrypt(entries['iv'], entries['salt'], password, entries['plain'])
+            encrypted = aes_encrypt(entries['iv'], entries['salt'], password, entries['plain'])
             return len(entries['payload']) > 0 and \
                 entries['payload'].upper() == encrypted.hex()[0:len(entries['payload'])].upper()
-        except:
+        except Exception:
             return False
 
 class Note:
     def __init__(self, content):
-        self.noteTable = None
+        self.note_table = None
 
         if content.database.table:
             for table in content.database.table:
                 if table['name'] == 'notes':
-                    self.noteTable = table
+                    self.note_table = table
 
     def count(self):
-        if not self.noteTable or not self.noteTable.row:
+        if not self.note_table or not self.note_table.row:
             return 0
-        return len(self.noteTable.row)
+        return len(self.note_table.row)
 
     def notes(self, password):
-        if not self.noteTable or not self.noteTable.row:
+        if not self.note_table or not self.note_table.row:
             return
 
-        for note in self.noteTable.row:
+        for note in self.note_table.row:
             entries = { col['name']: col.cdata for col in note.col }
             yield {
                 'category': entries['cat_id'],
                 'title': entries['title'],
-                'body': aesDecrypt(entries['iv'], entries['salt'], password, entries['body']).decode('utf-8'),
+                'body': aes_decrypt(entries['iv'], entries['salt'], password, entries['body']).decode('utf-8'),
                 'modified': entries['last_update']
             }
 
@@ -82,10 +82,10 @@ class App(QWidget):
         self.setWindowTitle(self.title)
         self.setGeometry(self.left, self.top, self.width, self.height)
 
-        qtRectangle = self.frameGeometry()
-        centerPoint = QDesktopWidget().availableGeometry().center()
-        qtRectangle.moveCenter(centerPoint)
-        self.move(qtRectangle.topLeft())
+        qt_rectangle = self.frameGeometry()
+        center_point = QDesktopWidget().availableGeometry().center()
+        qt_rectangle.moveCenter(center_point)
+        self.move(qt_rectangle.topLeft())
 
         self.tableWidget = QTableWidget()
         self.tableWidget.setColumnCount(4)
@@ -129,9 +129,9 @@ class App(QWidget):
             self.loadContent(content, password)
 
     def openFile(self):
-        fileName = self._selectFile()
-        if fileName:
-            content = untangle.parse(fileName)
+        file_name = self._selectFile()
+        if file_name:
+            content = untangle.parse(file_name)
             password = self._promptPassword()
             if password:
                 self.parseAndDisplay(content, password)
@@ -145,11 +145,11 @@ class App(QWidget):
     def _selectFile(self):
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
-        fileName, _ = QFileDialog.getOpenFileName(self, 'Select AndSafe export file', '', 'XML Files (*.xml);;All Files (*)', options=options)
-        return fileName
+        file_name, _ = QFileDialog.getOpenFileName(self, 'Select AndSafe export file', '', 'XML Files (*.xml);;All Files (*)', options=options)
+        return file_name
 
     def _promptPassword(self):
-        text, okPressed = QInputDialog.getText(self, 'Password', 'Password to decrypt the file:', QLineEdit.Password, '')
+        text, _ = QInputDialog.getText(self, 'Password', 'Password to decrypt the file:', QLineEdit.Password, '')
         return text
 
 
