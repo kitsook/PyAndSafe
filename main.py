@@ -1,8 +1,9 @@
 import sys
 import untangle
-from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit, \
+from PyQt6 import QtGui
+from PyQt6.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit, \
     QFileDialog, QMessageBox, QVBoxLayout, QTableWidget, QTableWidgetItem, \
-    QDesktopWidget, QProgressDialog
+    QProgressDialog
 
 from cipher import aes_decrypt, aes_encrypt
 
@@ -83,7 +84,7 @@ class App(QWidget):
         self.setGeometry(self.left, self.top, self.width, self.height)
 
         qt_rectangle = self.frameGeometry()
-        center_point = QDesktopWidget().availableGeometry().center()
+        center_point = QtGui.QGuiApplication.primaryScreen().availableGeometry().center()
         qt_rectangle.moveCenter(center_point)
         self.move(qt_rectangle.topLeft())
 
@@ -125,35 +126,41 @@ class App(QWidget):
         signature = Signature(content)
         if not signature.validate(password):
             self._errMsg("Incorrect password")
+            self.openFile()
         else:
             self.loadContent(content, password)
 
     def openFile(self):
-        file_name = self._selectFile()
-        if file_name:
-            content = untangle.parse(file_name)
-            password = self._promptPassword()
-            if password:
-                self.parseAndDisplay(content, password)
+        while True:
+            try:
+                file_name = self._selectFile()
+                if file_name:
+                    content = untangle.parse(file_name)
+                    password = self._promptPassword()
+                    if password:
+                        self.parseAndDisplay(content, password)
+                        break;
+                else:
+                    break;
+            except Exception:
+                self._errMsg("Problem opening file")
 
     def _msg(self, title, message):
-        QMessageBox.information(self, title, message, QMessageBox.Ok)
+        QMessageBox.information(self, title, message, QMessageBox.StandardButton.Ok)
 
     def _errMsg(self, message):
         self._msg('Error', message)
 
     def _selectFile(self):
-        options = QFileDialog.Options()
-        options |= QFileDialog.DontUseNativeDialog
-        file_name, _ = QFileDialog.getOpenFileName(self, 'Select AndSafe export file', '', 'XML Files (*.xml);;All Files (*)', options=options)
+        file_name, _ = QFileDialog.getOpenFileName(self, 'Select AndSafe export file', '', 'XML Files (*.xml);;All Files (*)', options=QFileDialog.Option.DontUseNativeDialog)
         return file_name
 
     def _promptPassword(self):
-        text, _ = QInputDialog.getText(self, 'Password', 'Password to decrypt the file:', QLineEdit.Password, '')
+        text, _ = QInputDialog.getText(self, 'Password', 'Password to decrypt the file:', QLineEdit.EchoMode.Password, '')
         return text
 
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     ex = App()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
