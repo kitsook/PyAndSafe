@@ -3,7 +3,7 @@ from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
 
-def aes_decrypt(iv, salt, password, payload):
+def aes_decrypt(iv, salt, password, payload, version):
     """ Decrypt AndSafe payload
 
     Keyword arguments:
@@ -19,7 +19,7 @@ def aes_decrypt(iv, salt, password, payload):
     kdf = Scrypt(
         salt=bytes.fromhex(salt),
         length=32,
-        n=2**14,
+        n=2**16 if version == 4 else 2**14,
         r=8,
         p=1,
         backend=backend)
@@ -29,7 +29,7 @@ def aes_decrypt(iv, salt, password, payload):
     decryptor = cipher.decryptor()
     return unpadder.update(decryptor.update(bytes.fromhex(payload)) + decryptor.finalize()) + unpadder.finalize()
 
-def aes_encrypt(iv, salt, password, plain):
+def aes_encrypt(iv, salt, password, plain, version):
     """ Encrypt AndSafe plaintext
 
     Keyword arguments:
@@ -45,7 +45,7 @@ def aes_encrypt(iv, salt, password, plain):
     kdf = Scrypt(
         salt=bytes.fromhex(salt),
         length=32,
-        n=2**14,
+        n=2**16 if version == 4 else 2**14,
         r=8,
         p=1,
         backend=backend)
