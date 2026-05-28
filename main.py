@@ -17,6 +17,7 @@ class AndSafeExportFile:
 class Signature:
     def __init__(self, content):
         self.signature_obj = None
+        self.version = 4
 
         if content.database.table:
             for table in content.database.table:
@@ -30,12 +31,13 @@ class Signature:
         data = self.signature_obj.row
         # convert to dict for quick access
         entries = { col['name']: col.cdata for col in data.col }
-        # only support verstion 2 or 3
-        if not entries['ver'] or not (entries['ver'] == '2' or entries['ver'] == '3'):
+        # only support verstion 2, 3, or 4
+        if not entries['ver'] or not (entries['ver'] == '2' or entries['ver'] == '3' or entries['ver'] == '4'):
             return False
+        self.version = int(entries['ver'])
 
         try:
-            encrypted = aes_encrypt(entries['iv'], entries['salt'], password, entries['plain'])
+            encrypted = aes_encrypt(entries['iv'], entries['salt'], password, entries['plain'], self.version)
             return len(entries['payload']) > 0 and \
                 entries['payload'].upper() == encrypted.hex()[0:len(entries['payload'])].upper()
         except Exception:
@@ -55,7 +57,7 @@ class Note:
             return 0
         return len(self.note_table.row)
 
-    def notes(self, password):
+    def notes(self, password, version):
         if not self.note_table or not self.note_table.row:
             return
 
@@ -64,7 +66,7 @@ class Note:
             yield {
                 'category': entries['cat_id'],
                 'title': entries['title'],
-                'body': aes_decrypt(entries['iv'], entries['salt'], password, entries['body']).decode('utf-8'),
+                'body': aes_decrypt(entries['iv'], entries['salt'], password, entries['body'], version).decode('utf-8'),
                 'modified': entries['last_update']
             }
 
@@ -100,7 +102,7 @@ class App(QWidget):
         self.show()
         self.openFile()
 
-    def loadContent(self, content, password):
+    def loadContent(self, content, password, version):
         collections = Note(content)
         self.tableWidget.setRowCount(collections.count())
 
@@ -112,7 +114,7 @@ class App(QWidget):
         progress.show()
 
         self.tableWidget.setSortingEnabled(False)
-        for note in collections.notes(password):
+        for note in collections.notes(password, version):
             self.tableWidget.setItem(row, 0, QTableWidgetItem(note['category']))
             self.tableWidget.setItem(row, 1, QTableWidgetItem(note['modified']))
             self.tableWidget.setItem(row, 2, QTableWidgetItem(note['title']))
@@ -128,7 +130,7 @@ class App(QWidget):
             self._errMsg("Incorrect password")
             self.openFile()
         else:
-            self.loadContent(content, password)
+            self.loadContent(content, password, signature.version)
 
     def openFile(self):
         while True:
