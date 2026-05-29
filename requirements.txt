@@ -1,4 +1,4 @@
-cryptography==45.0.6
-PyQt6==6.9.1
-PyQt6-sip==13.10.2
+cryptography==48.0.0
+PyQt6==6.11.0
+PyQt6-sip==13.11.1
 untangle==1.2.1
